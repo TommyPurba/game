@@ -1,32 +1,95 @@
 
-var buttonColours = ["red", "blue", "green", "yellow"];
+let buttonColours =["red", "blue", "green", "yellow"];
+let gamePatten = [];
+let userClickPatten=[];
+let press = false;
+let level = 0;
 
-var gamePattern = [];
 
-//3. At the top of the game.js file, create a new empty array with the name userClickedPattern.
-var userClickedPattern = [];
-
-//1. Use jQuery to detect when any of the buttons are clicked and trigger a handler function.
 $(".btn").click(function() {
+    let userChosenColour = $(this).attr("id");
+    userClickPatten.push(userChosenColour);
 
-  //2. Inside the handler, create a new variable called userChosenColour to store the id of the button that got clicked.
-  var userChosenColour = $(this).attr("id");
 
-  //4. Add the contents of the variable userChosenColour created in step 2 to the end of this new userClickedPattern
-  userClickedPattern.push(userChosenColour);
+    playSound(userChosenColour);
+    animatePress(userChosenColour);
 
-  console.log(userClickedPattern);
 
-});
+    checkAnswer(userClickPatten.length-1);
+  });
+
 
 function nextSequence() {
-
-  var randomNumber = Math.floor(Math.random() * 4);
-  var randomChosenColour = buttonColours[randomNumber];
-  gamePattern.push(randomChosenColour);
-
-  $("#" + randomChosenColour).fadeIn(100).fadeOut(100).fadeIn(100);
-
-  var audio = new Audio("sounds/" + randomChosenColour + ".mp3");
-  audio.play();
+    let randomNumber = Math.floor(Math.random()*4);
+    let randomChosenColour = buttonColours[randomNumber];
+    gamePatten.push(randomChosenColour);
+    level++;
+    $("#level-title").text("Level " + level);
+    userClickPatten = [];
+    playSound(randomChosenColour);
 }
+
+function playSound(name) {
+    $("#" + name).fadeIn(100).fadeOut(100).fadeIn(100);
+    let audio = new Audio("sounds/" + name + ".mp3");
+    audio.play();
+}
+
+
+function animatePress(coen){
+
+    $('#' + coen).addClass("pressed");
+    
+    setTimeout(function (){
+    
+    $("#"+ coen ).removeClass("pressed")
+    
+    },100)
+    
+    };
+
+
+    $(document).keypress(function(){
+     if(!press){
+        $("#level-title").text("Level " + level);
+        nextSequence();
+        press = true;   
+     }
+       
+    });
+
+
+    function checkAnswer(currentLevel) {
+        if(gamePatten[currentLevel] === userClickPatten[currentLevel]){
+            console.log("right");
+
+            if(userClickPatten.length === gamePatten.length){
+                setTimeout(function () {
+                    nextSequence();
+                  }, 1000);
+            }
+        }
+        else {
+            $("body").addClass("game-over");
+    
+                setTimeout(function (){
+                
+                    $("body").removeClass("game-over")
+                    
+                },200)
+                $("#level-title").text("game over !!! please any key to play again");
+                let audios = new Audio("sounds/wrong.mp3");
+                    audios.play();
+                    startOver()
+            }
+    }
+
+
+
+    function startOver() {
+        level = 0;
+        gamePatten = [];
+        press = false;
+    }
+
+
